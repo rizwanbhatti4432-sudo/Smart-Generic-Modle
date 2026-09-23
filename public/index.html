@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Generic Modle - AI & Photo Studio</title>
+  <meta name="description" content="Smart Generic Modle: Advanced Android Photo Editor & Multimodal Gemini AI Assistant in Roman Urdu and English.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #818cf8;
+      --secondary: #06b6d4;
+      --accent: #f59e0b;
+      --bg: #0b0f19;
+      --surface: #131b2e;
+      --surface-card: #1e293b;
+      --surface-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Background glow decorations */
+    .glow-sphere {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-1 { top: -100px; left: -100px; background: var(--primary); }
+    .glow-2 { top: 300px; right: -100px; background: var(--secondary); }
+
+    /* Navigation */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      background: rgba(11, 15, 25, 0.85);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .brand-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: #fff;
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      padding: 0.6rem 1.4rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-download:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 5rem 0 3rem;
+      text-align: center;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1rem;
+      border-radius: 9999px;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: var(--primary-light);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--surface-border);
+      color: #fff;
+      padding: 0.8rem 1.6rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Live Interactive Demo Box */
+    .interactive-demo {
+      margin: 3.5rem 0;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .demo-header {
+      background: rgba(0, 0, 0, 0.25);
+      border-bottom: 1px solid var(--surface-border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .demo-tabs {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .demo-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 0.5rem 1.2rem;
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .demo-tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+    }
+
+    .demo-content {
+      padding: 2rem;
+    }
+
+    /* Photo Editor Canvas Area */
+    .editor-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .editor-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .canvas-container {
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 380px;
+      position: relative;
+      border: 1px solid var(--surface-border);
+    }
+
+    #previewCanvas {
+      max-width: 100%;
+      max-height: 480px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .editor-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      background: var(--surface-card);
+      padding: 1.5rem;
+      border-radius: 16px;
+      border: 1px solid var(--surface-border);
+    }
+
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #cbd5e1;
+    }
+
+    .control-group input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+    }
+
+    .filter-chips {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--surface-border);
+      color: #fff;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 4rem 0;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 20px;
+      padding: 2rem;
+      transition: all 0.25s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+    }
+
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #fff;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Netlify instructions */
+    .deploy-section {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(99, 102, 241, 0.1));
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 24px;
+      padding: 3rem;
+      margin: 4rem 0;
+      text-align: center;
+    }
+
+    .deploy-section h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .steps-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+      text-align: left;
+    }
+
+    .step-box {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      padding: 1.25rem;
+      border-radius: 14px;
+    }
+
+    .step-box .num {
+      width: 28px;
+      height: 28px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 2.5rem 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-sphere glow-1"></div>
+  <div class="glow-sphere glow-2"></div>
+
+  <!-- Navbar -->
+  <nav>
+    <a href="#" class="brand">
+      <div class="brand-badge">✨</div>
+      <span>Smart Generic Modle</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#demo">Live Demo</a>
+      <a href="#deploy">Deploy to Netlify</a>
+      <a href="#download" class="btn-download">📲 Get Android APK</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <main class="container">
+    <section class="hero">
+      <div class="badge-pill">
+        <span>🚀</span> Android App & Web Portal Active
+      </div>
+      <h1>Smart Generic Modle<br><span>AI & Creative Photo Studio</span></h1>
+      <p>
+        An intelligent Android & Web experience featuring live CameraX capture, 8 professional color filters, fine image adjustments, and Gemini AI vision in Roman Urdu & English.
+      </p>
+      <div class="hero-actions">
+        <a href="#demo" class="btn-download" style="padding: 0.8rem 1.8rem; font-size: 1rem;">
+          🎨 Try Live Photo Editor
+        </a>
+        <a href="#deploy" class="btn-secondary">
+          🌐 Netlify Deployment Steps
+        </a>
+      </div>
+    </section>
+
+    <!-- Interactive Live Demo Section -->
+    <section id="demo" class="interactive-demo">
+      <div class="demo-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <strong style="color: #fff;">Interactive Studio Preview</strong>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">(Real Client-Side Canvas)</span>
+        </div>
+        <div class="demo-tabs">
+          <label for="imageUpload" class="demo-tab-btn active" style="cursor: pointer;">
+            📁 Upload Custom Photo
+          </label>
+          <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+          <button class="demo-tab-btn" onclick="resetCanvasEdits()">🔄 Reset</button>
+          <button class="demo-tab-btn" onclick="downloadEditedCanvas()">💾 Download</button>
+        </div>
+      </div>
+
+      <div class="demo-content">
+        <div class="editor-layout">
+          <!-- Canvas Container -->
+          <div class="canvas-container">
+            <canvas id="previewCanvas"></canvas>
+          </div>
+
+          <!-- Controls -->
+          <div class="editor-controls">
+            <h4 style="color: #fff; font-size: 1rem; margin-bottom: 0.5rem;">Preset Filters</h4>
+            <div class="filter-chips">
+              <button class="filter-btn active" onclick="applyPreset('normal', this)">Original</button>
+              <button class="filter-btn" onclick="applyPreset('vibrant', this)">Vibrant</button>
+              <button class="filter-btn" onclick="applyPreset('sunset', this)">Golden Hour</button>
+              <button class="filter-btn" onclick="applyPreset('cyberpunk', this)">Cyberpunk</button>
+              <button class="filter-btn" onclick="applyPreset('noir', this)">Noir B&W</button>
+              <button class="filter-btn" onclick="applyPreset('sepia', this)">Vintage</button>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--surface-border); margin: 0.5rem 0;">
+
+            <div class="control-group">
+              <label>
+                <span>Brightness</span>
+                <span id="brightnessVal">100%</span>
+              </label>
+              <input type="range" id="brightnessInput" min="50" max="150" value="100" oninput="updateFilters()">
+            </div>
+
+            <div class="control-group">
+              <label>
+                <span>Contrast</span>
+                <span id="contrastVal">100%</span>
+              </label>
+              <input type="range" id="contrastInput" min="50" max="180" value="100" oninput="updateFilters()">
+            </div>
+
+            <div class="control-group">
+              <label>
+                <span>Saturation</span>
+                <span id="saturationVal">100%</span>
+              </label>
+              <input type="range" id="saturationInput" min="0" max="200" value="100" oninput="updateFilters()">
+            </div>
+
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem;">
+              💡 Tap or drag sliders to adjust in real-time.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features">
+      <h2 style="font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 0.5rem;">Engineered for Performance</h2>
+      <p style="text-align: center; color: var(--text-muted); margin-bottom: 2.5rem;">Everything you need in a modern creative Android & Web app.</p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📸</div>
+          <h3>CameraX Integration</h3>
+          <p>Real-time hardware camera viewfinder with instant front/back lens switching, flash controls, and shutter capture for immediate analysis.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">✨</div>
+          <h3>Gemini 3.5 AI Multimodal</h3>
+          <p>Powered by Google AI Studio Gemini API with inline image analysis, Roman Urdu & English photo critique, captions, and creative suggestions.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>8 Color Grading Presets</h3>
+          <p>Vibrant, Golden Warmth, Cool Cyan, Cyberpunk Neon, Noir B&W, and Vintage Sepia with live hold-to-compare gestures.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">💾</div>
+          <h3>Local Room Persistence</h3>
+          <p>Complete SQLite Room database integration with Coroutines Flow for offline storage of messages, edits, and conversations.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Netlify Deployment Section -->
+    <section id="deploy" class="deploy-section">
+      <h2>🚀 How to Deploy this Site on Netlify</h2>
+      <p style="color: var(--text-muted); max-width: 650px; margin: 0 auto;">
+        We have already created the <code>netlify.toml</code> configuration and <code>public/</code> build folder for you!
+      </p>
+
+      <div class="steps-list">
+        <div class="step-box">
+          <div class="num">1</div>
+          <strong>Push to GitHub</strong>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">Push this repository to your GitHub account using AI Studio's export or git push.</p>
+        </div>
+
+        <div class="step-box">
+          <div class="num">2</div>
+          <strong>Connect to Netlify</strong>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">Go to <a href="https://app.netlify.com" target="_blank" style="color: var(--primary-light);">app.netlify.com</a> & select <em>"Add new site" → "Import from Git"</em>.</p>
+        </div>
+
+        <div class="step-box">
+          <div class="num">3</div>
+          <strong>Automatic Settings</strong>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">Netlify automatically detects <code>netlify.toml</code> and sets Publish Directory to <code>public</code>.</p>
+        </div>
+
+        <div class="step-box">
+          <div class="num">4</div>
+          <strong>Instant Live URL</strong>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">Click <strong>Deploy Site</strong>! Your website goes live with free HTTPS and global CDN in under 30 seconds.</p>
+        </div>
+      </div>
+
+      <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 1rem; display: inline-block; font-size: 0.9rem;">
+        ⚡ <strong>Direct Drag & Drop Option:</strong> You can also drag the <code>public</code> folder straight onto <a href="https://app.netlify.com/drop" target="_blank" style="color: var(--primary-light); text-decoration: underline;">app.netlify.com/drop</a> for instant zero-config hosting!
+      </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" style="text-align: center; padding: 3rem 0 5rem;">
+      <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 1rem;">Experience the Native Android App</h2>
+      <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 2rem;">
+        Export the APK directly from AI Studio's top settings menu or build with Android Studio to run on your phone.
+      </p>
+      <a href="#" class="btn-download" onclick="alert('In AI Studio, click on Settings/Top Menu -> Export as APK to generate the standalone installable APK for your Android phone!')">
+        📱 Download APK Guide
+      </a>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>© 2026 Smart Generic Modle. Powered by Gemini API & Jetpack Compose.</p>
+    </div>
+  </footer>
+
+  <!-- Script for Live Canvas Preview -->
+  <script>
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    let baseImage = new Image();
+    let currentPreset = 'normal';
+
+    // Draw initial demo canvas
+    function initDefaultImage() {
+      canvas.width = 640;
+      canvas.height = 420;
+
+      // Draw gradient scenery
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      grad.addColorStop(0, '#1e1b4b');
+      grad.addColorStop(0.5, '#4338ca');
+      grad.addColorStop(1, '#06b6d4');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Add sun/glow
+      ctx.beginPath();
+      ctx.arc(320, 210, 80, 0, Math.PI * 2);
+      ctx.fillStyle = '#fbbf24';
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 40;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Add mountains
+      ctx.beginPath();
+      ctx.moveTo(100, 420);
+      ctx.lineTo(260, 220);
+      ctx.lineTo(420, 420);
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(280, 420);
+      ctx.lineTo(460, 180);
+      ctx.lineTo(640, 420);
+      ctx.fillStyle = '#1e293b';
+      ctx.fill();
+
+      // Text watermark
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 20px Plus Jakarta Sans, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Smart Generic Modle Demo Canvas', 320, 70);
+
+      // Cache as image
+      baseImage.src = canvas.toDataURL();
+    }
+
+    // Image Upload
+    document.getElementById('imageUpload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        baseImage = new Image();
+        baseImage.onload = function() {
+          canvas.width = baseImage.width;
+          canvas.height = baseImage.height;
+          updateFilters();
+        };
+        baseImage.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function applyPreset(preset, btn) {
+      currentPreset = preset;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      updateFilters();
+    }
+
+    function updateFilters() {
+      const brightness = document.getElementById('brightnessInput').value;
+      const contrast = document.getElementById('contrastInput').value;
+      const saturation = document.getElementById('saturationInput').value;
+
+      document.getElementById('brightnessVal').innerText = brightness + '%';
+      document.getElementById('contrastVal').innerText = contrast + '%';
+      document.getElementById('saturationVal').innerText = saturation + '%';
+
+      let filterString = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`;
+
+      switch (currentPreset) {
+        case 'vibrant':
+          filterString += ' saturate(150%) contrast(110%)';
+          break;
+        case 'sunset':
+          filterString += ' sepia(35%) hue-rotate(-20deg) saturate(130%)';
+          break;
+        case 'cyberpunk':
+          filterString += ' hue-rotate(180deg) saturate(160%) contrast(120%)';
+          break;
+        case 'noir':
+          filterString += ' grayscale(100%) contrast(140%)';
+          break;
+        case 'sepia':
+          filterString += ' sepia(85%) contrast(105%)';
+          break;
+      }
+
+      ctx.filter = filterString;
+      ctx.drawImage(baseImage, 0, 0, canvas.width, canvas.height);
+      ctx.filter = 'none';
+    }
+
+    function resetCanvasEdits() {
+      document.getElementById('brightnessInput').value = 100;
+      document.getElementById('contrastInput').value = 100;
+      document.getElementById('saturationInput').value = 100;
+      applyPreset('normal', document.querySelector('.filter-btn'));
+    }
+
+    function downloadEditedCanvas() {
+      const link = document.createElement('a');
+      link.download = 'smart_generic_modle_edit.jpg';
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      link.click();
+    }
+
+    window.onload = initDefaultImage;
+  </script>
+</body>
+</html>
