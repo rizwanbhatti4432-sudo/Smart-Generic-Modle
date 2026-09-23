@@ -1,0 +1,6 @@
+{
+  "name": "Smart Generic Modle",
+  "description": "Smart Generic Modle: Advanced photo editing, AI photo analysis with Gemini, and Roman Urdu/English smart chat assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
